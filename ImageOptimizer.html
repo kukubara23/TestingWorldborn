@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Image Optimizer – © 2025 Laurent Mazenc (aka Atypikk Mazenc)</title>
+  <style>
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background-image: url("scripts/images/introbackground.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  font-family: 'EB Garamond', serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  background-image: url("scripts/images/introbackground.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+  border: 6px solid #5e4522;
+  border-radius: 12px;
+  box-shadow: inset 0 0 40px rgba(90, 70, 30, 0.3), 0 0 15px rgba(0,0,0,0.4);
+  font-family: 'EB Garamond', serif;
+  padding: 40px;
+  text-align: center;
+  width: 90%;
+  max-width: 600px;
+}
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #mapInput {
+      font-size: 18px;
+      margin: 20px 0;
+    }
+
+    #compressionInput {
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+#downloadBtn {
+  margin-top: 30px;
+  background: linear-gradient(to bottom, #968058, #6d5435);
+  color: #fff8e1;
+  padding: 12px 24px;
+  font-size: 17px;
+  font-weight: bold;
+  font-family: 'EB Garamond', serif;
+  border: 2px solid #5e4522;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease;
+  display: none;
+}
+
+#downloadBtn:hover {
+  transform: scale(1.05);
+}
+
+    #message {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+.info-box {
+  background-color: rgba(255, 255, 255, 0.75);
+  border: 4px solid #5e4522;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 25px;
+  text-align: left;
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+  box-shadow: inset 0 0 20px rgba(90, 70, 30, 0.2);
+}
+
+    canvas {
+      display: none;
+    }
+	
+	
+	label {
+  display: block;
+  margin-top: 20px;
+  font-weight: bold;
+  font-family: 'EB Garamond', serif;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+}
+
+input[type="range"] {
+  width: 100%;
+  margin-top: 10px;
+  appearance: none;
+  height: 10px;
+  border-radius: 5px;
+  outline: none;
+  background: linear-gradient(to right, #5e4522 80%, #c8b080 80%);
+  box-shadow: inset 0 0 5px rgba(90, 70, 30, 0.3);
+  transition: background 0.3s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #5e4522;
+  cursor: pointer;
+}
+
+input[type="file"] {
+  font-family: 'EB Garamond', serif;
+  margin-top: 20px;
+}
+	
+	
+	
+	
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🖼️ Image Optimizer</h1>
+  <p style="font-size: 13px; color: gray;">© 2025 Laurent Mazenc (aka Atypikk Mazenc)</p>
+
+  <input type="file" accept="image/*" id="mapInput">
+
+<label for="compressionInput">
+  Compression level (JPEG quality):
+  <span id="compressionValue">0.8</span>
+</label>
+<input type="range" id="compressionInput" min="0.1" max="1" step="0.1" value="0.8">
+
+  <div id="compressionDetails" class="info-box">
+    <strong>Compression guide:</strong><br>
+    <ul>
+      <li><b>1.0</b> = Best quality, largest file</li>
+      <li><b>0.8</b> = Good balance (default)</li>
+      <li><b>0.6</b> = Visually acceptable in most cases</li>
+      <li><b>0.4</b> = Strong compression, visible artifacts</li>
+      <li><b>0.2</b> and below = Ultra light, very degraded</li>
+    </ul>
+  </div>
+
+  <p id="message"></p>
+  <button id="downloadBtn">💾 Download Optimized Image</button>
+
+  <canvas id="resizeCanvas"></canvas>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('mapInput');
+  const canvas = document.getElementById('resizeCanvas');
+  const ctx = canvas.getContext('2d');
+  const message = document.getElementById('message');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const compressionInput = document.getElementById('compressionInput');
+  const compressionValue = document.getElementById('compressionValue');
+
+  // Affiche la valeur au chargement
+  compressionValue.textContent = compressionInput.value;
+
+  // Met à jour dynamiquement la valeur affichée
+  compressionInput.addEventListener('input', () => {
+    compressionValue.textContent = compressionInput.value;
+  });
+
+  let currentImg = null;
+
+  input.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const sizeMB = file.size / 1024 / 1024;
+    const maxSizeMB = 1;
+    const img = new Image();
+
+    img.onload = () => {
+      if (sizeMB <= maxSizeMB) {
+        message.innerText = `✅ This image is already optimized (${Math.round(sizeMB * 10) / 10} MB).`;
+        canvas.style.display = 'none';
+        downloadBtn.style.display = 'none';
+        return;
+      }
+
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0, img.width, img.height);
+
+      message.innerText = `📉 Image too large (${Math.round(sizeMB * 10) / 10} MB). Ready to optimize.`;
+      downloadBtn.style.display = 'inline-block';
+      currentImg = img;
+    };
+
+    img.src = URL.createObjectURL(file);
+  });
+
+  downloadBtn.onclick = () => {
+    const quality = parseFloat(compressionInput.value);
+    canvas.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'optimized-map.jpg';
+      a.click();
+    }, 'image/jpeg', quality);
+  };
+});
+
+
+function updateSliderBackground(slider) {
+  const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+  slider.style.background = `linear-gradient(to right, #5e4522 ${value}%, #c8b080 ${value}%)`;
+}
+
+// Mise à jour au chargement
+updateSliderBackground(compressionInput);
+
+// Et à chaque changement
+compressionInput.addEventListener('input', () => {
+  compressionValue.textContent = compressionInput.value;
+  updateSliderBackground(compressionInput);
+});
+
+
+</script>
+
+</body>
+</html>

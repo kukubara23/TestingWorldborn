@@ -1,0 +1,1955 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+  <head>
+    <title>WorldBorn: The Interactive Fantasy Map Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="scripts/leaflet.css">
+    <script src="scripts/leaflet.js"></script>
+	<link rel="stylesheet" href="scripts/leaflet-easybutton/easy-button.css">
+<script src="scripts/leaflet-easybutton/easy-button.js"></script>
+<script src="scripts/app.js"></script>
+   <script src="scripts/sortable.min.js"></script>
+    <style>	
+	@font-face {
+  font-family: 'EB Garamond';
+  src: url('scripts/fonts/EBGaramond-VariableFont_wght.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+	
+body.showcase-hovering-steps,
+body.showcase-hovering-steps * {
+  cursor: url('scripts/images/cursors/steps.png') 32 32, auto !important;
+}
+	
+	.fantasy-modal {
+  background-image: url("scripts/images/introbackground.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+  border: 6px solid #5e4522;
+  border-radius: 12px;
+  box-shadow: inset 0 0 40px rgba(90, 70, 30, 0.3), 0 0 15px rgba(0,0,0,0.4);
+  font-family: 'EB Garamond', serif;
+}
+
+
+/* 🧰 Style fantasy dédié à la toolbox */
+.toolbox-fantasy-panel {
+  background-image: url("scripts/images/introbackground.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: 5px solid #5e4522;
+  border-radius: 10px;
+  box-shadow: inset 0 0 25px rgba(90, 70, 30, 0.3), 0 0 12px rgba(0, 0, 0, 0.4);
+  padding: 12px;
+  font-family: 'EB Garamond', serif;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+}
+
+/* 🎨 Panneau stylisé pour le choix de fond */
+.background-fantasy-panel {
+  background-image: url("scripts/images/introbackground.jpg"); /* ou un autre image si tu veux */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: 5px solid #5e4522;
+  border-radius: 10px;
+  box-shadow: inset 0 0 25px rgba(90, 70, 30, 0.3), 0 0 12px rgba(0, 0, 0, 0.4);
+  padding: 15px;
+  font-family: 'EB Garamond', serif;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 300px;
+}
+
+
+.background-ok-button {
+  padding: 8px 20px;
+  background: linear-gradient(to bottom, #968058, #6d5435);
+  color: #fff8e1;
+  border: 2px solid #5e4522;
+  border-radius: 8px;
+  font-weight: bold;
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease;
+  align-self: center;
+}
+
+.background-ok-button:hover {
+  transform: scale(1.05);
+}
+
+/* 🌟 Style parchemin spécifique au formulaire de hitbox */
+.hitbox-fantasy-panel {
+  background-image: url("scripts/images/introbackground.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+  border: 5px solid #5e4522;
+  border-radius: 10px;
+  box-shadow: inset 0 0 25px rgba(90, 70, 30, 0.3), 0 0 12px rgba(0, 0, 0, 0.4);
+  padding: 20px;
+  font-family: 'EB Garamond', serif;
+  max-width: 420px;
+  min-width: 280px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.fantasy-ok-button {
+  margin-top: 15px;
+  padding: 10px 25px;
+  background: linear-gradient(to bottom, #a1845c, #7b5b3f);
+  color: #fff8e1;
+  border: 2px solid #5e4522;
+  border-radius: 8px;
+  font-weight: bold;
+  font-family: 'EB Garamond', serif;
+  font-size: 17px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease;
+  width: auto;
+  min-width: 100px;
+  max-width: 180px;
+}
+
+.fantasy-ok-button:hover {
+  transform: scale(1.05);
+}
+	
+      html, body {
+        height: 100%;
+        margin: 0;
+      }
+
+      #map {
+        height: 100vh;
+        width: 100vw;
+      }
+
+#mapLoaderPanel.fantasy-modal {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  max-width: 100%;
+  font-size: 15px;
+  font-family: 'EB Garamond', serif;
+  box-sizing: border-box;
+}
+
+#mapLoaderPanel input {
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #5e4522;
+  flex: 1;
+  min-width: 150px;
+}
+
+#mapLoaderPanel button {
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #5e4522;
+  background: linear-gradient(to bottom, #a1845c, #7b5b3f);
+  color: #fff8e1;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+
+#modeToggle {
+  display: none; /* pas de !important ! */
+}
+
+	  
+#modeToggle.showcase-auto-hide {
+  transition: opacity 0.3s ease !important;
+}
+
+#modeToggle.showcase-hidden {
+  opacity: 0 !important;
+  pointer-events: auto !important; /* important pour laisser hover réactif */
+}
+	  
+	  
+	  
+	 /* Slider switch style */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 28px;
+  opacity: 0.8; /* semi-transparence */
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(204, 204, 204, 0.7); /* gris semi-transparent */
+  border-radius: 34px;
+  transition: 0.3s;
+  backdrop-filter: blur(1px);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: rgba(255, 255, 255, 0.9); /* blanc doux */
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+input:checked + .slider {
+  background-color: rgba(76, 175, 80, 0.8); /* vert semi-transparent */
+}
+
+input:checked + .slider:before {
+  transform: translateX(32px);
+}
+	  
+	  
+.mode-toggle {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  font-family: sans-serif;
+}	  
+	  
+	  	  
+#toolboxPanel {
+  position: fixed;
+  top: 10px;
+  left: 70px;
+  border-radius: 10px;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+  padding: 10px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  font-family: sans-serif;
+  cursor: default;
+  user-select: none;
+}
+
+#toolboxPanel button {
+  color: white;
+  padding: 6px 12px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#introButton {
+  background-color: #7e57c2; /* violet */
+}
+#addZoneButton { background-color: #4CAF50; }
+#deleteZoneButton { background-color: #D32F2F; }
+#backgroundButton { background-color: #4a4a4a; }
+#addLayerButton { background-color: #2196F3; } /* bleu */
+#deleteLayerButton { background-color: #FF9800; } /* orange */
+#helpButton {
+  background-color: #8D6E63; /* marron */
+}
+#aboutButton {
+  background-color: #000000; /* noir */
+}
+
+#imageOptimizerButton {
+  background-color: #c2185b; /* rose foncé */
+}
+
+#backgroundOptions {
+  position: absolute;
+  top: 150px;
+  left: 300px;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  display: none;
+}
+
+#map.pen-mode, #map.pen-mode * {
+  cursor: url('scripts/images/cursors/pen.png') 2 3, auto !important;
+}
+
+#map.eraser-mode, #map.eraser-mode * {
+  cursor: url('scripts/images/cursors/eraser.png') 6 26, auto !important;
+}
+
+.click-feedback {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  transform: scale(0);
+  animation: ripple 0.4s ease-out forwards;
+  pointer-events: none;
+  z-index: 99999;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(6);
+    opacity: 0;
+  }
+}
+
+#interactionBlocker {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: auto;
+}
+
+	  
+	#closeCityButton {
+  position: absolute;
+  top: 15px;
+  left: 60px;
+  font-size: 24px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 100000;
+  font-family: sans-serif;
+  transition: background-color 0.3s ease;
+}
+
+#closeCityButton:hover {
+  background-color: rgba(255, 0, 0, 0.8);
+}
+
+.city-overlay img.fadeout {
+  transition: opacity 0.3s ease;
+  opacity: 0 !important;
+}  
+	  
+	  
+#hitboxForm.draggable-active {
+  cursor: move;
+  user-select: none;
+}	  
+
+
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 99999;
+  justify-content: center;
+  align-items: center;
+  font-family: sans-serif;
+}
+
+.intro-modal {
+  background-image: url("scripts/images/introbackground.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+
+  padding: 30px;
+  border: 6px solid #5e4522;
+  border-radius: 12px;
+  box-shadow: inset 0 0 40px rgba(90, 70, 30, 0.3), 0 0 15px rgba(0,0,0,0.4);
+  max-width: 500px;
+  width: 90%;
+  font-family: 'EB Garamond', serif;
+}
+
+.modal-title {
+  margin-bottom: 15px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.checkbox-label span {
+  margin-left: 10px;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.full-width-input {
+  width: 100%;
+}
+
+.modal-button-container {
+  display: flex;
+  justify-content: center;
+}
+
+.modal-button {
+  background: #7e57c2;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* 🆘 Help Modal Styles */
+.help-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100000;
+  justify-content: center;
+  align-items: center;
+  font-family: 'EB Garamond', serif;
+}
+
+.help-content {
+  background-image: url("scripts/images/introbackground.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+
+  padding: 30px;
+  border: 6px solid #5e4522;
+  border-radius: 12px;
+  box-shadow: inset 0 0 40px rgba(90, 70, 30, 0.3), 0 0 15px rgba(0, 0, 0, 0.4);
+  text-align: left;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 90%;
+  font-family: 'EB Garamond', serif;
+}
+
+#introImmersiveModal {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background-image: url("scripts/images/introbackground.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+  
+  padding: 30px;
+  border: 6px solid #5e4522;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 100000;
+  box-shadow: inset 0 0 40px rgba(90, 70, 30, 0.3), 0 0 15px rgba(0,0,0,0.4);
+  text-align: center;
+  display: none;
+  font-family: 'EB Garamond', serif;
+}
+
+
+#introImmersiveModal h2 {
+  font-size: 25px;
+  margin-bottom: 15px;
+}
+#introImmersiveModal p {
+  font-size: 18px;
+  line-height: 1.5;
+  text-align: justify;
+}
+#introImmersiveModal img {
+  max-width: 75%;
+  height: auto;
+  margin: 20px auto 10px auto;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  display: block;
+  border: 1px solid #ccc;
+}
+#introImmersiveModal button {
+  margin-top: 20px;
+  padding: 6px 16px; /* réduit un peu la taille */
+  background-color: rgba(187, 149, 83, 0.8); /* transparent */
+  color: #fff8e1;
+  border: 2px solid #5e4522;
+  border-radius: 4px;
+  font-weight: bold;
+  font-family: 'EB Garamond', serif;
+  font-size: 15px; /* plus petit aussi */
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+#introImmersiveModal button:hover {
+  background-color: rgba(94, 63, 41, 0.9); /* version hover aussi un poil translucide */
+  transform: scale(1.03);
+}
+
+
+#introImmersiveModal {
+  transition: opacity 1.2s ease;
+  opacity: 1; /* important pour l'état visible */
+}
+
+#introImmersiveModal.fade-out {
+  opacity: 0;
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+/* 🌍 Style fantasy + transparence pour le panneau des layers */
+.leaflet-control-layers {
+  background-image: url("scripts/images/introbackground.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: rgba(255, 255, 255, 0.8); /* fond semi-transparent */
+  backdrop-filter: blur(2px); /* petit flou en fond pour un effet parchemin */
+  border: 4px solid #5e4522;
+  border-radius: 10px;
+  box-shadow: inset 0 0 20px rgba(90, 70, 30, 0.3), 0 0 10px rgba(0, 0, 0, 0.4);
+  font-family: 'EB Garamond', serif;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+  padding: 10px;
+}
+
+/* 📦 Style des labels et checkboxes */
+.leaflet-control-layers label {
+  display: flex;
+  align-items: center;
+  margin: 6px 0;
+  font-weight: bold;
+}
+
+/* 🎯 Checkbox style fantasy */
+.leaflet-control-layers input[type="checkbox"] {
+  accent-color: #5e4522;
+  margin-right: 8px;
+  transform: scale(1.2);
+}
+
+/* 🧭 Titre ou texte supplémentaire si besoin */
+.leaflet-control-layers-separator {
+  border-top: 2px solid #5e4522;
+  margin: 8px 0;
+}
+
+.leaflet-control-custom-btn {
+  background-image: url("scripts/images/introbackground.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: rgba(255, 255, 255, 0.5); /* légère transparence */
+  backdrop-filter: blur(2px); /* optionnel pour effet de parchemin flouté */
+  border: 3px solid #5e4522;
+  border-radius: 8px !important;
+  box-shadow: inset 0 0 15px rgba(90, 70, 30, 0.2), 0 0 8px rgba(0, 0, 0, 0.3);
+  font-family: 'EB Garamond', serif;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+  padding: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.leaflet-control-custom-btn:hover {
+  transform: scale(1.05);
+}
+
+.leaflet-control-zoom {
+  display: none !important;
+}
+
+
+	/* 🧰 Bouton fantasy style (toolbox) */
+.leaflet-control .leaflet-bar button.toolbox-button {
+  width: 44px;
+  height: 44px;
+  padding: 6px;
+  background-image: url("scripts/images/introbackground.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: 3px solid #5e4522;
+  border-radius: 10px;
+  box-shadow: inset 0 0 12px rgba(90, 70, 30, 0.3), 0 0 8px rgba(0, 0, 0, 0.5);
+  font-family: 'EB Garamond', serif;
+  text-shadow: 0 1px 1px #3b2f1e;
+  transition: transform 0.2s ease;
+}
+
+.leaflet-control .leaflet-bar button.toolbox-button:hover {
+  transform: scale(1.1);
+}
+
+.leaflet-touch .leaflet-bar button {
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+}
+
+
+#colorPicker {
+  display: block;
+  margin: 0 auto 10px auto;
+  width: 60px;
+  height: 35px;
+  border: 2px solid #5e4522;
+  border-radius: 6px;
+}
+	
+.tooltip-helper {
+  position: relative;
+  cursor: help;
+  font-size: 18px;
+  color: #5e4522;
+  user-select: none;
+  display: inline-block;
+}
+
+.tooltip-helper .tooltip-bubble {
+  position: absolute;
+  left: 30px; /* 👉 se décale bien à droite */
+  bottom: 110%;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff8e1;
+  font-size: 17px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  white-space: normal;
+  text-align: left;
+  width: 260px;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  font-family: 'EB Garamond', serif;
+  max-width: 90vw;
+}
+
+.tooltip-helper.below-tooltip .tooltip-bubble {
+  top: 120%; /* positionne sous le ❓ */
+  left: 50%; /* place le point de référence au centre */
+  transform: translateX(-50%); /* centre exactement */
+  bottom: auto;
+  right: auto;
+}
+
+.tooltip-helper:hover .tooltip-bubble {
+  opacity: 1;
+}
+
+/* empêche le scroll horizontal/vertical */
+body {
+  overflow: hidden;
+}
+
+#hitboxForm {
+  overflow-y: auto !important;
+}
+		
+.leaflet-control-attribution {
+  display: none !important;
+}	
+		
+	.leaflet-control-layers-toggle {
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+	
+.leaflet-control-layers input[type="radio"] {
+  accent-color: #5e4522; /* marron foncé fantasy */
+  transform: scale(1.1); /* pour les grossir un peu si tu veux */
+  margin-right: 6px;
+}	
+		
+	.leaflet-control-layers label {
+  font-size: 15px;
+  font-family: 'EB Garamond', serif;
+  font-weight: bold;
+  text-shadow: 0 1px 1px #f4e5c3;
+}
+
+#showcaseTextOverlay .overlay-title {
+  font-size: 23px;
+  font-family: 'EB Garamond', serif;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+#showcaseTextOverlay .overlay-body {
+  font-size: 18px;
+  font-family: 'EB Garamond', serif;
+  text-align: justify;
+}
+
+
+/* 🌟 Scrollbar fantasy style pour hitboxForm */
+#hitboxForm::-webkit-scrollbar {
+  width: 14px;
+}
+
+#hitboxForm::-webkit-scrollbar-track {
+  background: url("scripts/images/introbackground.jpg"); /* parchemin */
+  border-left: 2px solid #5e4522;
+  border-right: 2px solid #5e4522;
+  background-size: cover;
+  box-shadow: inset 0 0 10px rgba(90, 70, 30, 0.3);
+}
+
+#hitboxForm::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #a1845c, #6b4f31);
+  border: 2px solid #5e4522;
+  border-radius: 10px;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.3);
+}
+
+#hitboxForm::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #8b6b45, #5a3e24);
+}
+
+/* 🧙 Compatibilité Firefox */
+#hitboxForm {
+  scrollbar-width: thin;
+  scrollbar-color: #a1845c #f4e5c3;
+}
+
+
+
+/* 🔍 Curseur personnalisé avec curseur animé JS */
+/* Cache le curseur natif */
+body.showcase-hovering-hitbox,
+body.showcase-hovering-hitbox * {
+  cursor: none !important;
+}
+
+/* Wrapper global : suit la souris */
+#cursor-wrapper {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  width: 110px;
+  height: 110px;
+  transform: translate(-55px, -55px);
+  display: none;
+}
+
+/* Glow extérieur : applique l’ombre ici */
+#glow-cursor {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  filter: drop-shadow(0 0 10px #fff8e1) drop-shadow(0 0 16px #ffd700);
+}
+
+/* L’image reste à taille normale */
+#animated-cursor {
+  width: 110px;
+  height: 110px;
+}
+
+
+
+.floating-tooltip {
+opacity: 0;
+visibility: hidden;
+  position: fixed;
+  z-index: 99999;
+  max-width: 100vw;
+  max-height: 90vh;
+  background: rgba(0, 0, 0, 0.88);
+  color: #fff8e1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-family: 'EB Garamond', serif;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: auto; /* ✅ important pour scroll si image immense */
+}
+
+.floating-tooltip .tooltip-text {
+  max-width: 240px; /* ou moins selon ton ressenti */
+  line-height: 1.4;
+  word-wrap: break-word;
+  text-align: justify;
+}
+
+.floating-tooltip img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+
+#hitboxForm {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: 50vh;
+  overflow: hidden;
+}
+
+#hitboxFormCloseWrapper {
+  position: sticky;
+  top: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0;
+  background: transparent; /* ✅ Transparent total */
+  z-index: 10;
+}
+
+#hitboxFormClose {
+  font-size: 22px;
+  font-weight: bold;
+  color: #5e4522;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid #5e4522;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  text-align: center;
+  line-height: 26px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.hitbox-scrollable-content {
+  overflow-y: auto;
+  padding: 10px 20px;
+}
+
+#enterArchivesButton {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff8e1;
+  font-size: 18px;
+  font-style: italic;
+  font-family: 'EB Garamond', serif;
+  padding: 6px 14px;
+  border-radius: 8px;
+  z-index: 100002;
+  pointer-events: auto;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(255, 230, 160, 0.2);
+  transition: all 0.3s ease;
+}
+
+#enterArchivesButton:hover {
+  text-decoration: underline;
+  box-shadow: 0 0 12px rgba(255, 220, 130, 0.6);
+  background: rgba(0, 0, 0, 0.75);
+}
+
+@keyframes pulseChevron {
+  0% { transform: translateX(0); opacity: 0.6; }
+  50% { transform: translateX(3px); opacity: 1; }
+  100% { transform: translateX(0); opacity: 0.6; }
+}
+
+#enterArchivesButton::after {
+  content: ' ›';
+  display: inline-block;
+  animation: pulseChevron 1.8s infinite ease-in-out;
+}
+
+/* 📚 Archives dashboard styling */
+#archivesContentList h3 {
+  font-size: 22px;
+  text-align: center;
+  margin-top: 25px;
+  margin-bottom: 10px;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+  font-family: 'EB Garamond', serif;
+}
+
+#archivesContentList p {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  text-align: justify;
+  font-family: 'EB Garamond', serif;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+}
+
+#archivesContentList img {
+  max-width: 70%;
+  height: auto;
+  display: block;
+  margin: 20px 80px;
+  border-radius: 8px;
+ /* box-shadow: 0 2px 8px rgba(0,0,0,0.3); */
+  border: 1px solid #5e4522;
+}
+
+/* 🌟 Scrollbar fantasy style pour archives modal */
+#archivesModalContent::-webkit-scrollbar {
+  width: 14px;
+}
+
+#archivesModalContent::-webkit-scrollbar-track {
+  background: url("scripts/images/introbackground.jpg");
+  border-left: 2px solid #5e4522;
+  border-right: 2px solid #5e4522;
+  background-size: cover;
+  box-shadow: inset 0 0 10px rgba(90, 70, 30, 0.3);
+}
+
+#archivesModalContent::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #a1845c, #6b4f31);
+  border: 2px solid #5e4522;
+  border-radius: 10px;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.3);
+}
+
+#archivesModalContent::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #8b6b45, #5a3e24);
+}
+
+/* 🧙 Compatibilité Firefox */
+#archivesModalContent {
+  scrollbar-width: thin;
+  scrollbar-color: #a1845c #f4e5c3;
+}
+
+
+.city-overlay .dashboard-preview {
+  transform: translateY(300%);
+  position: relative;
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+  height: 1px; /* pour éviter que ça prenne de la place visuellement */
+  overflow: hidden;
+}
+
+
+/* 🌟 Scrollbar fantasy style pour intro immersive modal */
+#introImmersiveModal::-webkit-scrollbar {
+  width: 14px;
+}
+
+#introImmersiveModal::-webkit-scrollbar-track {
+  background: url("scripts/images/introbackground.jpg");
+  border-left: 2px solid #5e4522;
+  border-right: 2px solid #5e4522;
+  background-size: cover;
+  box-shadow: inset 0 0 10px rgba(90, 70, 30, 0.3);
+}
+
+#introImmersiveModal::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #a1845c, #6b4f31);
+  border: 2px solid #5e4522;
+  border-radius: 10px;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.3);
+}
+
+#introImmersiveModal::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #8b6b45, #5a3e24);
+}
+
+/* Firefox support */
+#introImmersiveModal {
+  scrollbar-width: thin;
+  scrollbar-color: #a1845c #f4e5c3;
+}
+
+
+.sortable-ghost {
+  opacity: 0.5;
+  background: #fef8e1;
+  border: 1px dashed #a1845c;
+}
+
+.dashboard-item .drag-handle {
+  font-weight: bold;
+}
+
+#aboutModal .fantasy-modal::-webkit-scrollbar {
+  width: 14px;
+}
+
+#aboutModal .fantasy-modal::-webkit-scrollbar-track {
+  background: url("scripts/images/introbackground.jpg");
+  border-left: 2px solid #5e4522;
+  border-right: 2px solid #5e4522;
+  background-size: cover;
+  box-shadow: inset 0 0 10px rgba(90, 70, 30, 0.3);
+}
+
+#aboutModal .fantasy-modal::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #a1845c, #6b4f31);
+  border: 2px solid #5e4522;
+  border-radius: 10px;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.3);
+}
+
+#aboutModal .fantasy-modal::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #8b6b45, #5a3e24);
+}
+
+/* 🧙 Firefox support */
+#aboutModal .fantasy-modal {
+  scrollbar-width: thin;
+  scrollbar-color: #a1845c #f4e5c3;
+}
+
+.disabled-checkbox {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+#modeToggle {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  font-family: 'EB Garamond', serif;
+
+  background: rgba(255, 248, 225, 0.7); /* fond crème translucide */
+  border: 2px solid rgba(94, 69, 34, 0.4); /* contour doux */
+  border-radius: 10px;
+  padding: 8px 16px;
+  box-shadow: inset 0 0 6px rgba(90, 70, 30, 0.15), 0 0 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(2px); /* flou fantasy */
+}
+
+#modeLabel {
+  font-weight: bold;
+  color: rgba(59, 47, 30, 1); /* marron fantasy semi-transparente */
+  text-shadow: 0 1px 1px rgba(244, 229, 195, 0.8);
+  font-size: 17px;
+}
+
+/* 🪄 Zone de clic étendue en "aura" invisible autour */
+#modeToggle::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  left: -60px;
+  right: -60px;
+  bottom: -20px;
+  z-index: -1; /* en dessous du vrai contenu */
+}
+
+
+.pulse-feedback {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: pulseAnim 0.7s ease-out;
+  z-index: 9999;
+}
+
+@keyframes pulseAnim {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+  }
+}
+
+  .intro-modal {
+    position: relative; /* ✅ pour que la croix s’aligne sur ce conteneur */
+  }
+
+  #closeIntroConfig {
+    z-index: 9999 !important; /* ✅ pour s'assurer qu'elle passe au-dessus */
+  }
+  
+  
+  
+  /* 🏁 Positionnement et affichage des flags sur la carte */
+.flag-overlay {
+  width: 48px;
+  height: 48px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+
+  position: absolute !important;
+}
+
+.flag-overlay img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+ 
+  display: block;
+}
+  
+  
+@keyframes bounceFlag {
+  0%   { transform: translateY(0); }
+  30%  { transform: translateY(-12px); }
+  50%  { transform: translateY(0); }
+  70%  { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+.flag-bounce {
+  animation: bounceFlag 0.6s ease;
+  will-change: transform;
+}
+  
+  
+#mapWrapper {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  perspective: none;
+  transition: transform 0.4s ease, perspective 0.4s ease;
+}
+
+#mapWrapper.perspective-mode {
+  perspective: 1200px;
+}
+
+#map.perspective-rotated {
+  transform: rotateX(35deg) scale(1.05);
+  transform-origin: bottom center;
+  transition: transform 0.4s ease;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+}
+
+/* 🌟 Bouton parchemin fantasy pour activer la perspective */
+#btn-toggle-3d {
+  background-image: url("scripts/images/introbackground.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  padding: 6px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+   overflow: hidden; /* 🔧 Corrige les coins blancs */
+}
+
+/* ✨ Effet de survol fantasy */
+#btn-toggle-3d:hover {
+  transform: scale(1.1);
+  box-shadow: inset 0 0 20px rgba(90, 70, 30, 0.4), 0 0 12px rgba(0, 0, 0, 0.5);
+}
+
+/* 👁️ Icône mystique légèrement décalée */
+#btn-toggle-3d img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  transform: translate(3px, 2px); /* ➡️ Vers la droite et vers le bas */
+}
+  
+body {
+  background-image: url("background/space.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+
+
+
+
+	  
+    </style>
+	
+			
+  </head>
+
+  <body>
+<div id="mapWrapper">
+  <div id="map"></div>
+</div>
+	
+	
+	
+	
+	
+	<!-- 🔙 Bouton pour fermer les overlays de ville -->
+<div id="closeCityButton" style="display: none;">X</div>
+	
+	<div id="enterArchivesButton" style="
+  display: none;
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  font-style: italic;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff8e1;
+  padding: 6px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 100000;
+  font-family: 'EB Garamond', serif;
+  transition: background-color 0.3s ease;
+">
+</div>
+
+<!-- 🧭 Mode Switch Slider -->
+<div id="modeToggle" class="mode-toggle">
+  <label class="switch">
+    <input type="checkbox" id="modeSwitch" />
+    <span class="slider"></span>
+  </label>
+  <span id="modeLabel" style="margin-left: 10px; font-weight: bold;">🛠️ Editor Mode</span>
+</div>
+	
+<!-- Toolbox Panel -->
+<div id="toolboxPanel" class="toolbox-fantasy-panel" style="display: none;">
+  <button id="newProjectButton" style="background-color: #795548;">🆕 New Project</button>
+ <button id="saveProjectButton" style="background-color: #009688;">💾 Save Project</button>
+  <button id="loadProjectButton" style="background-color: #3F51B5;">📂 Load Project</button>
+  <button id="addZoneButton">➕ Add Interactive Zone</button>
+  <button id="deleteZoneButton">🗑️ Delete Interactive Zone</button>
+  <button id="addLayerButton">📘 Add Layer</button>
+  <button id="deleteLayerButton">📙 Delete Layer</button>
+  <button id="backgroundButton">🎨 Background</button>
+  <button id="introButton">🧭 Intro</button>
+  <button id="imageOptimizerButton">🖼️ Image Optimizer</button>
+  <button id="helpButton">❓ Help</button>
+  <button id="aboutButton">🧾 About</button>
+</div>
+
+<!-- Background options panel -->
+<div id="backgroundOptions" class="background-fantasy-panel" style="display: none;">
+<div id="closeBackgroundPanel" title="Close" style="
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff8e1;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid #5e4522;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  line-height: 22px;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+">×</div>
+  <input type="color" id="colorPicker" value="#ffffff" />
+  <label style="display: flex; align-items: center; gap: 8px;">
+  <span>or background image:</span>
+  <span 
+    class="tooltip-helper below-tooltip"
+    data-tooltip="Put your background images inside the background folder of WorldBorn: WorldBorn/background/">
+    ❓
+  </span>
+</label>
+<input type="text" id="imageNameInput" placeholder="Pick your world backdrop" />
+  <button id="applyButton" class="background-ok-button">Apply</button>
+</div>
+
+<div id="hitboxForm" class="hitbox-fantasy-panel" style="display:none; position:absolute; z-index:10000;">
+  <div id="hitboxFormCloseWrapper">
+    <div id="hitboxFormClose" title="Close and save">×</div>
+  </div>
+   
+  <div id="hitboxTitlePreview" style="
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+  color: #3b2f1e;
+  text-shadow: 0 1px 1px #f4e5c3;
+  font-family: 'EB Garamond', serif;
+"></div>
+ 
+  <div class="hitbox-scrollable-content">
+  
+  <!-- 🏷️ Nom de la zone -->
+<label style="display: block; margin-bottom: 14px;">
+  Zone name:<br>
+  <input id="hitboxNameInput" type="text" placeholder="e.g. Rivendell, Shadowmoor, Diamond City, Columbia…" />
+</label>
+<!-- 🎨 Couleur du titre en mode click -->
+<label style="display: block; margin-top: 12px; margin-bottom: 12px;">
+  Color:
+  <input type="color" id="clickTitleColorPicker" value="#fff8e1" style="width: 60px; height: 30px; border: 2px solid #5e4522; border-radius: 6px;" />
+</label>
+
+<!-- 🔧 Fix: forcer une vraie coupure entre les blocs -->
+<div style="clear: both; height: 16px;"></div>
+
+
+<!-- 📝 Description -->
+<label style="display: block; margin-top: 16px; margin-bottom: 6px;">Describe this zone:<br>
+  <textarea id="hitboxTextInput" rows="4" style="width:100%; max-height: 150px; overflow-y: auto; resize: vertical;" placeholder="Words shape the place..."></textarea>
+</label><br><br>
+
+<!-- 🎨 Couleur du texte en mode click -->
+<label style="display: block; margin-top: 1px; margin-bottom: 2px;">
+  Description text color:
+  <input type="color" id="clickTextColorPicker" value="#fff8e1" style="width: 60px; height: 30px; border: 2px solid #5e4522; border-radius: 6px;" />
+</label>
+
+<!-- 📍 Rayon de la zone -->
+<label style="display: block; margin-top: 12px;">How wide is the zone?<br>
+  <input id="hitboxRadiusInput" type="number" value="20000" placeholder="e.g. 20000" />
+</label><br>
+
+
+
+
+
+
+
+
+
+
+<!-- 🖼️ Image / mini-map -->
+<label style="display: block; margin-bottom: 2px;">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+    <span>Pick an image for this zone:</span>
+    <span 
+      class="tooltip-helper"
+      data-tooltip="Put your zone images inside the zones folder of WorldBorn: WorldBorn/zones/">
+      ❓
+    </span>
+  </div>
+  <input id="hitboxImageInput" type="text" placeholder="Click to select an image"/>
+</label><br>
+
+<!-- 📏 Échelle (pixels = mètres) -->
+<label>Image display scale:<br>
+  <input id="hitboxScaleInput" type="number" value="20" placeholder="e.g. 20" />
+</label><br>
+
+
+
+<!-- 🔊 Ambiance sonore -->
+<label style="display: block; margin-bottom: 2px;">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+    <span>Choose a background sound:</span>
+    <span 
+      class="tooltip-helper"
+      data-tooltip="Put your background audio inside the audio folder of WorldBorn: WorldBorn/audio/. Only .mp3 files are supported.">
+      ❓
+    </span>
+  </div>
+  <input id="hitboxSoundInput" type="text" placeholder="Click to select a sound"/>
+  <label style="margin-top: 8px; display: flex; align-items: center; gap: 6px;">
+  <input type="checkbox" id="hitboxSoundLoopCheckbox">
+  Don't loop audio
+</label>
+<label for="hitboxVolumeSlider">🎚️ Volume:</label>
+<input type="range" id="hitboxVolumeSlider" min="0" max="1" step="0.01" value="0.6">
+<span id="hitboxVolumeValue">60%</span>
+
+
+
+</label><br><br>
+
+
+
+<!-- 🏁 Enable Flag Checkbox -->
+<label style="display: block; margin-top: 12px;">
+  <input type="checkbox" id="flagEnabledCheckbox" />
+  <span style="margin-left: 6px; font-weight: bold;">📍 Display location pin</span>
+</label>
+
+<div id="flagImageWrapper" style="margin-top: 6px; display: none;">
+<label style="display: block; margin-bottom: 8px;">
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <span>🖼️ Pin image:</span>
+    <span 
+      class="tooltip-helper" 
+      data-tooltip="Put your flag images inside the pins folder of WorldBorn: WorldBorn/pins/">
+      ❓
+    </span>
+  </div>
+  <input type="text" id="flagImageInput" placeholder="Click to select a pin or marker" />
+</label>
+  <div id="flagImagePreviewContainer" style="margin-top: 5px;"></div>
+</div>
+<div id="flagAnchorModeWrapper" style="margin-top: 12px;">
+  <label style="font-weight: bold;">Pin Anchor:</label><br>
+  <label>
+    <input type="radio" name="flagAnchor" value="bottom" checked>
+    Bottom-Center <span style="font-size: 14px; color: #666;">(default for pins/flags)</span>
+  </label><br>
+  <label>
+    <input type="radio" name="flagAnchor" value="center">
+    Center <span style="font-size: 14px; color: #666;">(common for icons/markers)</span>
+  </label>
+</div>
+
+
+
+<div id="flagAdvancedWrapper">
+<label>Pin Offset X: <input type="range" id="flagOffsetX" min="-50" max="50"><input type="number" id="flagOffsetXNum" style="width:50px;"></label><br>
+<label>Pin Offset Y: <input type="range" id="flagOffsetY" min="-50" max="50"><input type="number" id="flagOffsetYNum" style="width:50px;"></label><br>
+<label>Pin Scale (%): <input type="range" id="flagScale" min="20" max="300"><input type="number" id="flagScaleNum" style="width:50px;"></label><br>
+<label><input type="checkbox" id="flagAnimateCheckbox" checked>Make the pin bounce on hover</label>
+</div>
+
+
+
+
+
+
+
+
+<label style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px; margin-top: 8px;">
+  <input type="checkbox" id="dashboardModeCheckbox" />
+  <span style="font-weight: bold;">📚 Enable local archives</span>
+  <span class="tooltip-helper below-tooltip">
+    ❓
+    <span class="tooltip-bubble">
+In showcase mode, this enables a special button (shown after clicking the zone) that opens an immersive scrollable area with custom texts and images.<br><br>
+You can configure this content in the “Local Archives” section at the bottom of this panel — it only appears when this option is enabled.
+    </span>
+  </span>
+</label>
+
+  <label style="display: block; margin-bottom: 12px;">
+    <input type="checkbox" id="hoverOnlyCheckbox" />
+    <span style="font-weight: bold;">🖱️ Disable click on this zone (hover only)</span>
+  </label>
+
+  <label style="display: block; margin-bottom: 8px; font-weight: bold;">
+    <input type="checkbox" id="noTextCheckbox" />
+    <span style="margin-left: 5px;">Do not display text on click</span>
+  </label>
+  <label style="display: block; margin-bottom: 8px;">
+  <input type="checkbox" id="hitboxHoverAnimCheckbox" />
+  <span style="margin-left: 5px; font-weight: bold; margin-bottom: 5px;">Enable hover animation effect</span>
+</label>
+  <label class="input-label" id="hoverAnimColorLabel" style="display: none;">
+  Animation color:
+  <input type="color" id="hoverAnimColorPicker" value="#ffffff">
+</label>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 🧠 Tooltip Title -->
+<label style="display: block; margin-top: 12px;">
+  Tooltip title (shown on hover):
+  <input id="hitboxTooltipTitleInput" type="text" placeholder="e.g. The Forgotten Tower" style="width: 100%;" />
+</label>
+
+<!-- 💬 Tooltip Text -->
+<label style="display: block; margin-top: 10px;">
+  Tooltip text:
+  <textarea id="hitboxTooltipTextInput" rows="3" placeholder="e.g. Once home to ancient guardians..." style="width: 100%; max-height: 90px; resize: vertical;"></textarea>
+</label>
+
+<!-- 🖼️ Tooltip Image -->
+<label style="display: block; margin-top: 12px;">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+    <span>Tooltip image:</span>
+    <span 
+      class="tooltip-helper"
+      data-tooltip="Put your tooltip images inside the zones folder of WorldBorn: WorldBorn/zones/">
+      ❓
+    </span>
+  </div>
+  <input id="hitboxTooltipImageInput" type="text" placeholder="Click to select an image"/>
+</label>
+
+<!-- 📐 Taille image tooltip -->
+<label style="display: block; margin-top: 8px;">
+  Tooltip image scale:
+  <input id="hitboxTooltipImageScaleInput" type="number" value="100" min="1" step="1" placeholder="100 = taille normale" style="width: 70px;" />
+
+</label>
+
+<!-- 🎨 Couleur titre tooltip -->
+<label style="display: block; margin-top: 12px;">
+  Tooltip title color:
+  <input type="color" id="tooltipTitleColorPicker" value="#fff8e1" style="width: 60px; height: 30px; border: 2px solid #5e4522; border-radius: 6px;" />
+</label>
+
+
+
+<!-- 🎨 Couleur texte tooltip -->
+<label style="display: block; margin-top: 8px;">
+  Tooltip text color:
+  <input type="color" id="tooltipTextColorPicker" value="#fff8e1" style="width: 60px; height: 30px; border: 2px solid #5e4522; border-radius: 6px;" />
+</label>
+
+
+
+<div style="margin-bottom: 10px; margin-top: 10px; display: flex; align-items: center; gap: 6px;">
+  <strong>Current Zoom Level:</strong> <span id="currentZoomDisplay">1.000</span>
+  <span 
+    class="tooltip-helper"
+    data-tooltip="Use the current zoom level as a reference to adjust the slider. For example, position the map at the minimum zoom level where the interactive zone should be clickable. Then, set the slider slightly lower (e.g. if the current zoom is 2.945, try 2.700 or 2.800) to ensure a safe margin.">
+    ❓
+  </span>
+</div>
+
+<label>
+  Zone visible only from zoom level:<br>
+  <input
+    type="range"
+    id="hitboxMinZoomSlider"
+    min="0"
+    max="7"
+    step="0.001"
+    value="1"
+    style="width: 220px; margin-top: 5px;"
+  />
+  <br>
+  <input
+    type="number"
+    id="zoomLevelNumeric"
+    min="0"
+    max="7"
+    step="0.001"
+    style="width: 80px; margin-top: 5px;"
+  />
+</label><br>
+
+
+
+
+
+
+
+
+
+<!-- 🧰 Dashboard Content Editor -->
+<div id="dashboardEditor" style="display: none; margin-top: 20px; padding-top: 10px; border-top: 1px solid #5e4522;">
+
+  <div style="text-align: center;">
+    <strong style="font-size: 17px; display: inline-block; margin-bottom: 10px;">📦 Local Archives</strong><br><br>
+
+<!-- ✏️ Titre Archives -->
+<div style="text-align: center; margin-bottom: 12px;">
+  <label for="dashboardTitleInput" style="font-weight: bold; display: block; margin-bottom: 5px;">
+    📌 Archives Title:
+  </label>
+  <input 
+    type="text" 
+    id="dashboardTitleInput" 
+    placeholder="e.g. Secrets of Erondil..." 
+    style="width: 80%; padding: 6px 10px; border-radius: 6px; border: 1px solid #5e4522; font-family: 'EB Garamond', serif; font-size: 20px;" />
+</div>
+
+<!-- 🪶 Texte personnalisé du bouton "Enter the Archives" -->
+<div style="text-align: center; margin-bottom: 14px;">
+  <label for="dashboardButtonLabelInput" style="font-weight: bold; display: block; margin-bottom: 5px;">
+    🖋️ Archives Button Label:
+  </label>
+  <input 
+    type="text" 
+    id="dashboardButtonLabelInput" 
+    placeholder="e.g. Explore the Ruins, Open the Grimoire..." 
+    style="width: 80%; padding: 6px 10px; border-radius: 6px; border: 1px solid #5e4522; font-family: 'EB Garamond', serif; font-size: 18px;" />
+</div>
+
+    <button type="button" id="addDashboardTextBtn" class="fantasy-ok-button" style="white-space: nowrap; margin-bottom: 10px;">
+      ➕ Add a text block
+    </button><br>
+
+    <button type="button" id="addDashboardImageBtn" class="fantasy-ok-button">
+      🖼️ Add an image
+    </button>
+  </div>
+
+  <div id="dashboardList" style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 6px;">
+    <em>No content added</em>
+  </div>
+</div>
+
+<!-- ✅ Bouton de validation -->
+<div style="text-align: center; margin-top: 10px;">
+  <button id="hitboxFormConfirm" class="fantasy-ok-button">OK</button>
+</div>
+</div>
+</div>
+
+<div id="interactionBlocker" style="position: fixed; inset: 0; z-index: 99999; display: none;"></div>
+
+<!-- Add Layer Modal -->
+<div id="addLayerModal" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 99999;
+  justify-content: center;
+  align-items: center;
+  font-family: 'EB Garamond', serif;
+">
+  <div class="fantasy-modal" style="
+  position: relative;
+    padding: 20px 30px;
+    text-align: center;
+    max-width: 400px;
+    min-width: 300px;
+  ">
+  
+  <div id="closeAddLayerModal" title="Close" style="
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff8e1;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid #5e4522;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  line-height: 22px;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+">×</div>
+   
+    <h2 style="margin-bottom: 15px;">📘 Add New Layer</h2>
+<label>
+  Layer name:<br>
+  <input 
+    type="text" 
+    id="layerTitleInput" 
+    style="width: 100%; margin-bottom: 10px;" 
+    placeholder="e.g. Political Borders, Faith Realms, Ancient Roads…" />
+</label>
+    <br>
+<label style="display: flex; align-items: center; gap: 8px;">
+  <span>Map for this layer:</span>
+  <span 
+    class="tooltip-helper" 
+    data-tooltip="Put your layer images inside the maps folder of WorldBorn: WorldBorn/maps/">
+    ❓
+  </span>
+</label>
+<input 
+  type="text" 
+  id="layerImageInput" 
+  style="width: 100%; margin-bottom: 10px;" 
+  placeholder="Click to choose a map for this layer…" />
+<div id="layerImagePreviewContainer"></div>
+    <br>
+    <button id="confirmAddLayerBtn" class="fantasy-ok-button">OK</button>
+  </div>
+</div>
+
+<!-- Delete Layer Confirmation Modal -->
+<div id="deleteLayerModal" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 99999;
+  justify-content: center;
+  align-items: center;
+  font-family: 'EB Garamond', serif;
+">
+  <div class="fantasy-modal" style="padding: 20px 30px; text-align: center; max-width: 400px; min-width: 300px;">
+    <h2 id="deleteLayerModalTitle" style="margin-bottom: 15px;">🗑️ Delete Layer?</h2>
+    <p id="deleteLayerModalMessage" style="margin-bottom: 20px; font-size: 15px;">
+      Are you sure you want to delete this layer?
+    </p>
+    <button id="confirmDeleteLayerBtn" class="fantasy-ok-button">OK</button>
+  </div>
+</div>
+
+<!-- 🌍 Intro Modal Setup -->
+<div id="introConfigModal" class="modal-overlay">
+  <div class="intro-modal fantasy-modal">
+<div id="closeIntroConfig" title="Close" style="
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff8e1;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid #5e4522;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  line-height: 22px;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+">×</div>
+    <h2 class="modal-title" style="text-align: center;">🧭 Intro Modal Setup</h2>
+   
+    <label class="checkbox-label">
+      <input type="checkbox" id="introEnabledCheckbox" />
+      <span>Enable intro modal on map load</span>
+    </label>
+
+    <label class="input-label">
+      Give This Realm a Name:<br>
+      <input type="text" id="introTitleInput" class="full-width-input" />
+    </label>
+
+    <label class="input-label">
+      A Message for Those Who Arrive:<br>
+      <textarea id="introTextInput" rows="4" class="full-width-input"></textarea>
+    </label>
+
+<label class="input-label" style="display: flex; align-items: center; gap: 6px;">
+  <span>Choose an opening image (optional):</span>
+  <span class="tooltip-icon" data-tooltip="Place your introduction image inside the folder WorldBorn/intro/">❓</span>
+</label>
+<input 
+  type="text" 
+  id="introImageInput" 
+  class="full-width-input" 
+  placeholder="Click to pick an image (e.g. dawn over mountains, old world globe)" />
+  
+  <label class="input-label">
+  Button text:<br>
+  <input type="text" id="introButtonLabelInput" class="full-width-input" placeholder="Explore these lands" />
+</label>
+  
+    <div class="modal-button-container">
+      <button id="introConfirmBtn" class="fantasy-ok-button">OK</button>
+
+    </div>
+  </div>
+</div>
+
+<!-- 🆘 Help Modal -->
+<div id="helpModal" class="help-modal">
+  <div id="helpContent" class="help-content">
+    <!-- contenu injecté dynamiquement -->
+  </div>
+</div>
+
+<!-- 💾 Save Project Modal -->
+<div id="saveProjectModal" class="modal-overlay" style="display: none;">
+  <div class="intro-modal fantasy-modal">
+    <h2 class="modal-title">💾 Save Project</h2>
+    
+<label class="checkbox-label" style="display: block;">
+  <input type="checkbox" id="standaloneCheckbox" />
+  <span>
+    Create standalone locked interactive map<br>
+    <small style="font-size: 12px; color: #555;">
+      (To activate: check this box, save into the <code><b>save</b></code> folder,<br>
+      and name the file <code><b>save.json</b></code>)
+    </small>
+  </span>
+</label>
+
+    <p style="margin-top: 15px; font-size: 14px;">
+      To enable automatic reloading of your last saved map (and intro modal if active),<br>
+      your save file must be located in the <code><b>save</b></code> folder and named exactly <code><b>save.json</b></code>.
+    </p>
+
+    <div class="modal-button-container" style="margin-top: 25px;">
+      <button id="saveProjectOkBtn" class="fantasy-ok-button">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🌟 Intro immersive modal -->
+<div id="introImmersiveModal">
+  <h2 id="introImmersiveTitle"></h2>
+  <p id="introImmersiveText"></p>
+  <img id="introImmersiveImage" src="" alt="Intro Image" />
+  <button id="introImmersiveButton" onclick="hideIntroModal()">Explore These Lands</button>
+</div>
+
+<div id="globalTooltip" style="
+  position: fixed;
+  max-width: 280px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff8e1;
+  font-size: 20px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-family: 'EB Garamond', serif;
+  z-index: 99999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  text-align: left;
+  white-space: normal;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+"></div>
+
+<!-- 🎨 Modal d’ajout dashboard -->
+<div id="dashboardModal" class="modal-overlay">
+  <div class="intro-modal fantasy-modal" style="max-width: 480px;">
+   <h2 id="dashboardModalTitle" class="modal-title" style="text-align: center;"></h2>
+
+    <label style="display: block; margin-bottom: 10px;">
+      <span id="dashboardModalLabel"></span><br>
+      <input type="text" id="dashboardModalInput" style="width: 100%;" />
+    </label>
+
+    <!-- 🖼️ Container preview -->
+    <div id="dashboardImagePreviewContainer" style="margin: 10px 0;"></div>
+
+    <div class="modal-button-container">
+      <button id="dashboardModalConfirmBtn" class="fantasy-ok-button">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- 📚 Modal Archives (Dashboard View) -->
+<div id="archivesModal" class="modal-overlay" style="display: none; z-index: 100003;">
+  <div id="archivesModalContent" class="fantasy-modal" style="
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 25px 30px;
+  ">
+    <div id="archivesModalClose" style="
+      position: sticky;
+      top: 10px;
+      right: 10px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #5e4522;
+      cursor: pointer;
+      background-color: rgba(255, 255, 255, 0.8);
+      border: 1px solid #5e4522;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      text-align: center;
+      line-height: 26px;
+      float: right;
+    ">×</div>
+    
+    <div id="archivesContentList">
+      <!-- 📦 contenu dynamique injecté ici -->
+    </div>
+  </div>
+</div>
+
+
+<div id="cursor-wrapper">
+  <div id="glow-cursor">
+    <img id="animated-cursor" src="scripts/images/cursors/animloupe.gif" alt="curseur animé">
+  </div>
+</div>
+</body>
+
+
+  </body>
+</html>

@@ -1,0 +1,161 @@
+
+🧾 Interactive Fantasy Map Creator
+
+Interactive Fantasy Map Creator is a tool designed to turn your fantasy maps into fully interactive and explorable experiences. Whether you're building a world for a game, a story, or just for fun—this app helps you bring it to life in a dynamic way.
+
+Created in 2025 by Laurent Mazenc, also known as Atypikk Mazenc.
+
+Version: 1.0.0
+
+Website: www.fantasymapassets.com
+Patreon: www.patreon.com/c/CartographicFantasy
+Instagram: www.instagram.com/mazenc_cartographist/
+
+© 2025 Laurent Mazenc (aka Atypikk Mazenc). All rights reserved.
+
+Interactive Fantasy Map Creator  
+Copyright © 2025 Laurent Mazenc (aka Atypikk Mazenc)  
+Official website: https://fantasymapassets.com/
+
+License Terms:
+
+You are allowed to:
+✔️ Use this application to create interactive maps for personal or commercial projects.
+✔️ Share exported standalone showcase versions (read-only) of your maps on platforms like Netlify or personal websites — as long as:
+   – The application is locked in standalone mode (non-editable).
+   – The source code is not publicly redistributed or downloadable.
+
+You are not allowed to:
+❌ Use this application itself as a base for commercial redistribution, SaaS tools, or online services.
+❌ Modify, reverse-engineer, or decompile this application.
+❌ Share or upload the source code (even unmodified) to public repositories (e.g., GitHub, GitLab, CodePen, etc.).
+❌ Redistribute this software or its assets as part of other applications or development kits.
+❌ Bypass the standalone lock to re-enable editor features.
+
+Additional Notes:
+This software is provided "as is", without warranty of any kind, express or implied.
+
+By using this software, you agree to these terms.
+
+Contact & Licensing: https://fantasymapassets.com/ 
+
+
+------------------------------------------
+Special thanks to Alexandros Triantafyllou for his contribution to this project, especially for the beautiful map of the city of Dryfeau and his valuable support.
+
+______________________________________________________________________________________________________________________________________________________
+
+
+📄 Third-Party Licenses
+
+______________________________________________________________________________________________________________________________________________________
+
+ungoogled-chromium (© 2015–2023, The ungoogled-chromium Authors) is used under the BSD 3-Clause License:
+
+BSD 3-Clause License
+
+Copyright (c) 2015-2023, The ungoogled-chromium Authors
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+Leaflet (© 2010–2025, Volodymyr Agafonkin) is used under the BSD 2-Clause License:
+
+BSD 2-Clause License
+
+Copyright (c) 2010-2025, Vladimir Agafonkin
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+    
+Miniserve (© 2018, Sven-Hendrik Haase) is used under the MIT License:
+
+MIT License
+
+Copyright (c) 2018 Sven-Hendrik Haase
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+OpenMoji (© 2018–2024 HfG Schwäbisch Gmünd and contributors) is used under the Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license:
+
+Creative Commons Attribution-ShareAlike 4.0 International
+
+Copyright (c) 2018–2024 HfG Schwäbisch Gmünd and OpenMoji contributors
+
+You are free to:
+- Share — copy and redistribute the material in any medium or format
+- Adapt — remix, transform, and build upon the material
+for any purpose, even commercially.
+
+Under the following terms:
+- Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+- ShareAlike — If you remix, transform, or build upon the material, you must distribute your contributions under the same license.
+
+License link: https://creativecommons.org/licenses/by-sa/4.0/
+
+Source: https://openmoji.org
+
+
+EB Garamond is licensed under the SIL Open Font License 1.1.
+See fonts/OFL.txt for more information.
